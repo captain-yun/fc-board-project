@@ -36,4 +36,47 @@ class JPaRepositoryTest {
                 .isNotNull()
                 .hasSize(100);
     }
+
+    @DisplayName(("insert 테스트"))
+    @Test
+    void givenTestData_whenInserting_thenWorksFine() {
+        long previousCount = articleRepository.count();
+        articleRepository.save(Article.of("new article", "new content", "#spring"));
+
+        assertThat(articleRepository.count()).isEqualTo(previousCount + 1);
+    }
+
+    @DisplayName(("update 테스트"))
+    @Test
+    void givenTestData_whenUpdating_thenWorksFine() {
+        // Given
+        Article article = articleRepository.findById(1L).orElseThrow();
+        String updatedHashtag = "#springboot";
+        article.setHashtag(updatedHashtag);
+
+        // When
+        Article savedArticle = articleRepository.saveAndFlush(article);
+
+        // Then
+        assertThat(savedArticle).hasFieldOrPropertyWithValue("hashtag", updatedHashtag);
+    }
+
+    @DisplayName(("delete 테스트"))
+    @Test
+    void givenTestData_whenDeleting_thenWorksFine() {
+        // Given
+        // cascading 옵션을 걸어놨기 때문에 게시글 삭제 시 연관된 댓글도 사라지는지 테스트 해야함.
+        Article article = articleRepository.findById(1L).orElseThrow();
+        long previousArticleCount = articleRepository.count();
+        long previousArticleCommentCount = articleCommentRepository.count();
+        long deletedCommentSize = article.getArticleComments().size();
+
+        // When
+        articleRepository.delete(article);
+
+        // Then
+        assertThat(articleRepository.count()).isEqualTo(previousArticleCount - 1);
+        assertThat(articleCommentRepository.count()).isEqualTo(previousArticleCommentCount - deletedCommentSize);
+    }
+
 }
