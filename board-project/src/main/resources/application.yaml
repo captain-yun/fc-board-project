@@ -25,7 +25,11 @@ spring:
   sql.init.mode: always
   thymeleaf3:
     decoupled-logic: true
-
+  devtools:
+    livereload:
+      enabled: true
+    restart:
+      enabled: true
 ---
 spring:
   config.activate.on-profile: testdb
